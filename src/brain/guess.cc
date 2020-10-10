@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   TFLITE_MINIMAL_CHECK(interpreter->inputs().size() == 1);
   auto input = interpreter->tensor(interpreter->inputs()[0]);
   TFLITE_MINIMAL_CHECK(input->type == kTfLiteFloat32);
-  TFLITE_MINIMAL_CHECK(input->bytes == 637 * sizeof(float));
+  TFLITE_MINIMAL_CHECK(input->bytes % (sizeof(float) * 13) == 0);
 
   // Allocate tensor buffers.
   TFLITE_MINIMAL_CHECK(interpreter->AllocateTensors() == kTfLiteOk);
@@ -47,9 +47,9 @@ loop:
   // Fill input
   for(size_t i = start; i < input->bytes / sizeof(float); i++)
   {
-    assert(scanf("%f", &input->data.f[i]) == 1);
+    TFLITE_MINIMAL_CHECK(scanf("%f", &input->data.f[i]) == 1);
   }
-  assert(getchar() == '\n');
+  TFLITE_MINIMAL_CHECK(getchar() == '\n');
 
   // Run inference
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
@@ -68,7 +68,7 @@ loop:
   if(start == 1)
     goto loop;
 
-  assert(start == EOF);
+  TFLITE_MINIMAL_CHECK(start == EOF);
 
   return 0;
 }

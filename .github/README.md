@@ -1,7 +1,9 @@
 # TensorFlow Keyword Spotting
 Native C/C++. Suitable for embedded devices.
 
-### Demo
+    ~$ git clone --recursive --depth 1 https://github.com/42io/tflite_kws.git
+
+### Inference
 Default models pre-trained on 0-9 words: zero one two three four five six seven eight nine.
 
     ~$ arecord -f S16_LE -c1 -r16000 -d1 test.wav
@@ -13,16 +15,26 @@ Default models pre-trained on 0-9 words: zero one two three four five six seven 
     ~$ fe test.wav | bin/guess models/cnn.tflite
     ~$ fe test.wav | bin/guess models/rnn.tflite
     ~$ fe test.wav | bin/guess models/dcnn.tflite
+    ~$ fe test.wav | head -48 | tail -47 | bin/guess models/dcnn47.tflite
+
+### Real Time
+Microphone quality is very important. You should probably think about how to remove fan noise from the mic... Using headset seems like a good idea :)
+
+    ~$ argmax() { mawk -Winteractive '{m=$1;j=1;for(i=j;i<=NF;i++)if($i>m){m=$i;j=i;}print j-1}'; }
+    ~$ unique() { mawk -v u=$1 -Winteractive '{if(x!=$1){c=0;x=$1}else if(++c==u&&y!=x)print y=x}'; }
+    ~$ ignore() { mawk -v t=$1 -Winteractive '{if($1<t)print $1}'; }
+    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
+       bin/ring 47 | bin/guess models/dcnn47.tflite | argmax | unique 10 | ignore 10
 
 ### Training
-Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb).
+Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb) | [DCNN47](jupyter/dcnn47.ipynb).
 
 Each notebook generates model file. To evaluate model accuracy:
 
     ~$ apt install gcc lrzip wget
     ~$ wget https://github.com/42io/dataset/releases/download/v1.0/0-9up.lrz -O /tmp/0-9up.lrz
     ~$ lrunzip /tmp/0-9up.lrz -o /tmp/0-9up.data # md5 87fc2460c7b6cd3dcca6807e9de78833
-    ~$ dataset/matrix.sh /tmp/0-9up.data 12 # num outputs
+    ~$ dataset/matrix.sh /tmp/0-9up.data
 
 Confusion matrix for pre-trained modeles:
 
@@ -86,6 +98,21 @@ Confusion matrix for pre-trained modeles:
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     DCNN guessed wrong 143...
 
+    DCNN47 confusion matrix...
+    zero   0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
+    one    0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.01 0.00 | 575
+    two    0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 564
+    three  0.00 0.00 0.01 0.97 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 548
+    four   0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 605
+    five   0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.00 | 607
+    six    0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 0.00 | 462
+    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 | 574
+    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 | 547
+    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.01 0.00 | 596
+    #unk#  0.00 0.01 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.97 0.00 | 730
+    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
+    DCNN47 guessed wrong 88...
+
 ### Heap Memory Usage
 Some magic numbers to know before stepping into embedded world.
 
@@ -94,3 +121,4 @@ Some magic numbers to know before stepping into embedded world.
     ~$ fe test.wav | valgrind bin/guess models/cnn.tflite              # 1,793,114 bytes allocated
     ~$ fe test.wav | valgrind bin/guess models/rnn.tflite              # 2,442,810 bytes allocated
     ~$ fe test.wav | valgrind bin/guess models/dcnn.tflite             # 595,958 bytes allocated
+    ~$ seq 611     | valgrind bin/guess models/dcnn47.tflite           # 968,482 bytes allocated
