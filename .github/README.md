@@ -1,4 +1,4 @@
-# TensorFlow Keyword Spotting
+# TensorFlow Lite Keyword Spotting
 Native C/C++. Suitable for embedded devices.
 
     ~$ git clone --recursive --depth 1 https://github.com/42io/tflite_kws.git
@@ -21,13 +21,22 @@ Default models pre-trained on 0-9 words: zero one two three four five six seven 
 Microphone quality is very important. You should probably think about how to remove fan noise from the mic... Using headset seems like a good idea :)
 
     ~$ argmax() { mawk -Winteractive '{m=$1;j=1;for(i=j;i<=NF;i++)if($i>m){m=$i;j=i;}print j-1}'; }
-    ~$ unique() { mawk -v u=$1 -Winteractive '{if(x!=$1){c=0;x=$1}else if(++c==u&&y!=x)print y=x}'; }
-    ~$ ignore() { mawk -v t=$1 -Winteractive '{if($1<t)print $1}'; }
+    ~$ stable() { mawk -Winteractive -v u=$1 '{if(x!=$1){c=0;x=$1}else if(++c==u&&y!=x)print y=x}'; }
+    ~$ ignore() { mawk -Winteractive -v t=$1 '{if($1<t)print $1}'; }
+
+Simple non-streaming mode. Model receives the whole input sequence and then returns the classification result:
+
     ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
-       bin/ring 47 | bin/guess models/dcnn47.tflite | argmax | unique 10 | ignore 10
+       bin/ring 47 | bin/guess models/dcnn47.tflite | argmax | stable 10 | ignore 10
+
+[Streaming](https://arxiv.org/abs/2005.06720) mode is more CPU friendly as it reduces MAC operations in neural
+network. Model receives portion of the input sequence and classifies it incrementally:
+
+    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
+       bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10
 
 ### Training
-Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb) | [DCNN47](jupyter/dcnn47.ipynb).
+Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb) | [DCNN47](jupyter/dcnn47.ipynb) | [DCNN13](jupyter/dcnn13.ipynb).
 
 Each notebook generates model file. To evaluate model accuracy:
 
@@ -113,6 +122,21 @@ Confusion matrix for pre-trained modeles:
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     DCNN47 guessed wrong 88...
 
+    DCNN13 confusion matrix...
+    zero   1.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
+    one    0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.01 0.00 | 575
+    two    0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 564
+    three  0.00 0.00 0.00 0.98 0.00 0.00 0.01 0.00 0.00 0.00 0.01 0.00 | 548
+    four   0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 605
+    five   0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.01 0.00 | 607
+    six    0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 0.00 | 462
+    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 | 574
+    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.01 0.00 | 547
+    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.01 0.00 | 596
+    #unk#  0.00 0.01 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.97 0.00 | 730
+    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
+    DCNN13 guessed wrong 82...
+
 ### Heap Memory Usage
 Some magic numbers to know before stepping into embedded world.
 
@@ -122,3 +146,4 @@ Some magic numbers to know before stepping into embedded world.
     ~$ fe test.wav | valgrind bin/guess models/rnn.tflite              # 2,442,810 bytes allocated
     ~$ fe test.wav | valgrind bin/guess models/dcnn.tflite             # 595,958 bytes allocated
     ~$ seq 611     | valgrind bin/guess models/dcnn47.tflite           # 968,482 bytes allocated
+    ~$ seq 13      | valgrind bin/guess models/dcnn13.tflite           # 671,398 bytes allocated
