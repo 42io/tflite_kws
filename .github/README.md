@@ -137,6 +137,20 @@ Confusion matrix for pre-trained modeles:
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     DCNN13 guessed wrong 82...
 
+Evaluate false positives (experimental):
+
+    ~$ wget https://data.deepai.org/timit.zip -O /tmp/timit.zip
+    ~$ unzip -q /tmp/timit.zip -d /tmp/timit # md5 5b736303c55cf4970926bb9978b655fe
+    ~$ dataset/false.sh /tmp/timit 100
+
+A false positive error, or false positive, is a result that indicates a given condition exists when it does not.
+
+    DCNN13  4787 | 11191
+    DCNN47  4517 | 11191
+    MLP     5091 | 10991
+    CNN     4958 | 10991
+    RNN     4527 | 10991
+
 ### Heap Memory Usage
 Some magic numbers to know before stepping into embedded world.
 
