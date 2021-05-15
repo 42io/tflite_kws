@@ -32,8 +32,9 @@ false_positive() {
   echo -e "${model^^}\t`find_guess "$@" | argmax | ignore 10 | wc -l` | `find_guess "$@" | wc -l`"
 }
 
-false_positive dcnn13  1   47
-false_positive dcnn47  47  1
-false_positive mlp     49  1 # doubtfully
-false_positive cnn     49  1 # doubtfully
-false_positive rnn     49  1 # doubtfully
+false_positive edcnn47  47  1
+false_positive dcnn13   1   47
+false_positive dcnn47   47  1
+false_positive mlp      49  1 # doubtfully
+false_positive cnn      49  1 # doubtfully
+false_positive rnn      49  1 # doubtfully
