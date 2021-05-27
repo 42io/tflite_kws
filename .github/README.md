@@ -178,3 +178,19 @@ Some magic numbers to know before stepping into embedded world.
     ~$ seq 611     | valgrind bin/guess models/dcnn47.tflite           # 968,482 bytes allocated
     ~$ seq 13      | valgrind bin/guess models/dcnn13.tflite           # 671,398 bytes allocated
     ~$ seq 611     | valgrind bin/guess models/edcnn47.tflite          # 1,661,132 bytes allocated
+
+### Play
+Let's consider voice control for led bulb.
+
+    ~$ bigram() { mawk -Winteractive '{if(s)print prev,$0; prev=$0; s=1}'; }
+    ~$ intent() { mawk -Winteractive '
+        /0 6/{system("./on.sh")}
+        /0 7/{system("./off.sh")}
+        /0 8/{system("./yellow.sh")}
+        /0 9/{system("./white.sh")}
+        '; }
+
+There are 4 commands here - turn on, off, change color. When we speak words `zero six`, script `./on.sh` will be executed e.t.c.
+
+    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
+       bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10 | bigram | intent
