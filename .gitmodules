@@ -1,0 +1,6 @@
+[submodule "dataset/dataset"]
+	path = dataset/dataset
+	url = https://github.com/42io/dataset.git
+[submodule "lib/tensorflow"]
+	path = lib/tensorflow
+	url = https://github.com/tensorflow/tensorflow.git
