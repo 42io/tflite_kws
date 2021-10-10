@@ -11,11 +11,11 @@ Default models pre-trained on 0-9 words: zero one two three four five six seven 
     ~$ dataset/dataset/google_speech_commands/src/features/build.sh
     ~$ src/brain/build.sh
     ~$ alias fe=dataset/dataset/google_speech_commands/bin/fe
-    ~$ fe test.wav | bin/guess models/mlp.tflite
-    ~$ fe test.wav | bin/guess models/cnn.tflite
-    ~$ fe test.wav | bin/guess models/rnn.tflite
     ~$ fe test.wav | bin/guess models/dcnn.tflite
     ~$ fe test.wav | head -48 | tail -47 | bin/guess models/dcnn47.tflite
+    ~$ cat <(fe test.wav) <(seq 52) | bin/guess models/dcnn13.tflite | tail -1
+
+Delay for streaming model 5 layers is `5 * 13 = 65`.
 
 ### Real Time
 Microphone quality is very important. You should probably think about how to remove fan noise from the mic... Using headset seems like a good idea :)
@@ -186,15 +186,15 @@ A false positive error, or false positive, is a result that indicates a given co
 ### Heap Memory Usage
 Some magic numbers to know before stepping into embedded world.
 
-    ~$ valgrind dataset/dataset/google_speech_commands/bin/fe test.wav # 606,416 bytes allocated
-    ~$ fe test.wav | valgrind bin/guess models/mlp.tflite              # 347,138 bytes allocated
-    ~$ fe test.wav | valgrind bin/guess models/cnn.tflite              # 1,793,114 bytes allocated
-    ~$ fe test.wav | valgrind bin/guess models/rnn.tflite              # 2,442,810 bytes allocated
-    ~$ seq 637     | valgrind bin/guess models/dcnn.tflite             # 595,958 bytes allocated
-    ~$ seq 611     | valgrind bin/guess models/dcnn47.tflite           # 968,482 bytes allocated
-    ~$ seq 13      | valgrind bin/guess models/dcnn13.tflite           # 671,398 bytes allocated
-    ~$ seq 611     | valgrind bin/guess models/edcnn47.tflite          # 1,661,132 bytes allocated
-    ~$ seq 611     | valgrind bin/guess models/ecnn47.tflite           # 8,625,814 bytes allocated
+    ~$ valgrind dataset/dataset/google_speech_commands/bin/fe test.wav # 638,336 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/mlp.tflite                  # 152,302 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/cnn.tflite                  # 896,442 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/rnn.tflite                  # 2,379,574 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/dcnn.tflite                 # 459,306 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/dcnn47.tflite               # 974,946 bytes allocated
+    ~$ seq 13  | valgrind bin/guess models/dcnn13.tflite               # 683,750 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/edcnn47.tflite              # 1,664,188 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/ecnn47.tflite               # 8,625,734 bytes allocated
 
 ### Play
 Let's consider voice control for led bulb.
@@ -209,5 +209,4 @@ Let's consider voice control for led bulb.
 
 There are 4 commands here - turn on, off, change color. When we speak words `zero six`, script `./on.sh` will be executed e.t.c.
 
-    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
-       bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10 | bigram | intent
+    ~$ ./mic.sh models/ecnn47.tflite | bigram | intent
