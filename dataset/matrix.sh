@@ -68,3 +68,4 @@ do_all 'DCNN47'  'dcnn47.tflite'  15 611 0  1
 do_all 'DCNN13'  'dcnn13.tflite'  15 611 65 52
 do_all 'EDCNN47' 'edcnn47.tflite' 15 611 0  1
 do_all 'ECNN47'  'ecnn47.tflite'  15 611 0  1
+do_all '2ECNN47' '2ecnn47.tflite' 15 611 0  1
