@@ -36,7 +36,7 @@ network. Model receives portion of the input sequence and classifies it incremen
        bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10
 
 ### Training
-Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb) | [DCNN47](jupyter/dcnn47.ipynb) | [DCNN13](jupyter/dcnn13.ipynb) | [EDCNN47](jupyter/edcnn47.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [2ECNN47](jupyter/2ecnn47.ipynb).
+Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb) | [DCNN47](jupyter/dcnn47.ipynb) | [DCNN13](jupyter/dcnn13.ipynb) | [EDCNN47](jupyter/edcnn47.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb).
 
 Each notebook generates model file. To evaluate model accuracy:
 
