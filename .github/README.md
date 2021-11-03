@@ -26,8 +26,8 @@ Microphone quality is very important. You should probably think about how to rem
 
 Simple non-streaming mode. Model receives the whole input sequence and then returns the classification result:
 
-    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
-       bin/ring 47 | bin/guess models/dcnn47.tflite | argmax | stable 10 | ignore 10
+    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | bin/ring 47 | \
+       bin/guess models/dcnn47.tflite | argmax | stable 10 | ignore 10
 
 [Streaming](https://arxiv.org/abs/2005.06720) mode is more CPU friendly as it reduces MAC operations in neural
 network. Model receives portion of the input sequence and classifies it incrementally:
@@ -36,7 +36,9 @@ network. Model receives portion of the input sequence and classifies it incremen
        bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10
 
 ### Training
-Jupyter Notebooks [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb) | [DCNN47](jupyter/dcnn47.ipynb) | [DCNN13](jupyter/dcnn13.ipynb) | [EDCNN47](jupyter/edcnn47.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb).
+[MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb)\
+[DCNN47](jupyter/dcnn47.ipynb) | [EDCNN47](jupyter/edcnn47.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb)\
+[DCNN13](jupyter/dcnn13.ipynb) | [2ECNN13](jupyter/2ecnn13.ipynb)
 
 Each notebook generates model file. To evaluate model accuracy:
 
@@ -182,6 +184,21 @@ Confusion matrix for pre-trained modeles:
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     2ECNN47 guessed wrong 93...
 
+    2ECNN13 confusion matrix...
+    zero   1.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
+    one    0.00 0.97 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.02 0.00 | 575
+    two    0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 564
+    three  0.00 0.00 0.00 0.97 0.00 0.00 0.00 0.00 0.00 0.00 0.02 0.00 | 548
+    four   0.00 0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 605
+    five   0.00 0.00 0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.01 0.00 | 607
+    six    0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 0.00 | 462
+    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 | 574
+    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 | 547
+    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.01 0.00 | 596
+    #unk#  0.00 0.01 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.00 | 730
+    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
+    2ECNN13 guessed wrong 92...
+
 Evaluate false positives:
 
     ~$ wget https://data.deepai.org/timit.zip -O /tmp/timit.zip
@@ -190,6 +207,7 @@ Evaluate false positives:
 
 A false positive error, or false positive, is a result that indicates a given condition exists when it does not.
 
+    2ECNN13   83 | 11191
     2ECNN47   48 | 11191
     EDCNN47 2042 | 11191
     ECNN47  4494 | 11191
@@ -212,6 +230,7 @@ Some magic numbers to know before stepping into embedded world.
     ~$ seq 611 | valgrind bin/guess models/edcnn47.tflite              # 1,664,188 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/ecnn47.tflite               # 8,625,734 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/2ecnn47.tflite              # 22,938,842 bytes allocated
+    ~$ seq 13  | valgrind bin/guess models/2ecnn13.tflite              # 7,249,354 bytes allocated
 
 ### Play
 Let's consider voice control for led bulb.
@@ -226,4 +245,4 @@ Let's consider voice control for led bulb.
 
 There are 4 commands here - turn on, off, change color. When we speak words `zero six`, script `./on.sh` will be executed e.t.c.
 
-    ~$ ./mic.sh models/2ecnn47.tflite | bigram | intent
+    ~$ ./mic.sh models/2ecnn13.tflite | bigram | intent
