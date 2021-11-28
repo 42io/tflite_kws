@@ -2,18 +2,19 @@
 Native C/C++. Suitable for embedded devices.
 
     ~$ git clone --recursive --depth 1 https://github.com/42io/tflite_kws.git
+    ~$ cd tflite_kws
+    ~$ apt install cmake gcc g++ unzip lrzip wget
 
 ### Inference
 Default models pre-trained on 0-9 words: zero one two three four five six seven eight nine.
 
     ~$ arecord -f S16_LE -c1 -r16000 -d1 test.wav
     ~$ aplay test.wav
-    ~$ dataset/dataset/google_speech_commands/src/features/build.sh
+    ~$ src/features/build.sh
     ~$ src/brain/build.sh
-    ~$ alias fe=dataset/dataset/google_speech_commands/bin/fe
-    ~$ fe test.wav | bin/guess models/dcnn.tflite
-    ~$ fe test.wav | head -48 | tail -47 | bin/guess models/dcnn47.tflite
-    ~$ cat <(fe test.wav) <(seq 52) | bin/guess models/dcnn13.tflite | tail -1
+    ~$ bin/fe test.wav | bin/guess models/dcnn.tflite
+    ~$ bin/fe test.wav | head -48 | tail -47 | bin/guess models/dcnn47.tflite
+    ~$ cat <(bin/fe test.wav) <(seq 52) | bin/guess models/dcnn13.tflite | tail -1
 
 Delay for streaming model 5 layers is `5 * 13 = 65`.
 
@@ -26,13 +27,13 @@ Microphone quality is very important. You should probably think about how to rem
 
 Simple non-streaming mode. Model receives the whole input sequence and then returns the classification result:
 
-    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | bin/ring 47 | \
+    ~$ arecord -f S16_LE -c1 -r16000 -t raw | bin/fe | bin/ring 47 | \
        bin/guess models/dcnn47.tflite | argmax | stable 10 | ignore 10
 
 [Streaming](https://arxiv.org/abs/2005.06720) mode is more CPU friendly as it reduces MAC operations in neural
 network. Model receives portion of the input sequence and classifies it incrementally:
 
-    ~$ arecord -f S16_LE -c1 -r16000 -t raw | fe | \
+    ~$ arecord -f S16_LE -c1 -r16000 -t raw | bin/fe | \
        bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10
 
 ### Training
@@ -42,7 +43,6 @@ network. Model receives portion of the input sequence and classifies it incremen
 
 Each notebook generates model file. To evaluate model accuracy:
 
-    ~$ apt install gcc lrzip wget
     ~$ wget https://github.com/42io/dataset/releases/download/v1.0/0-9up.lrz -O /tmp/0-9up.lrz
     ~$ lrunzip /tmp/0-9up.lrz -o /tmp/0-9up.data # md5 87fc2460c7b6cd3dcca6807e9de78833
     ~$ dataset/matrix.sh /tmp/0-9up.data
@@ -220,17 +220,17 @@ A false positive error, or false positive, is a result that indicates a given co
 ### Heap Memory Usage
 Some magic numbers to know before stepping into embedded world.
 
-    ~$ valgrind dataset/dataset/google_speech_commands/bin/fe test.wav # 638,336 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/mlp.tflite                  # 152,302 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/cnn.tflite                  # 896,442 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/rnn.tflite                  # 2,379,574 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/dcnn.tflite                 # 459,306 bytes allocated
-    ~$ seq 611 | valgrind bin/guess models/dcnn47.tflite               # 974,946 bytes allocated
-    ~$ seq 13  | valgrind bin/guess models/dcnn13.tflite               # 683,750 bytes allocated
-    ~$ seq 611 | valgrind bin/guess models/edcnn47.tflite              # 1,664,188 bytes allocated
-    ~$ seq 611 | valgrind bin/guess models/ecnn47.tflite               # 8,625,734 bytes allocated
-    ~$ seq 611 | valgrind bin/guess models/2ecnn47.tflite              # 22,938,842 bytes allocated
-    ~$ seq 13  | valgrind bin/guess models/2ecnn13.tflite              # 7,249,354 bytes allocated
+    ~$ head /dev/zero -c32000 | valgrind bin/fe           # 1,136,764 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/mlp.tflite     # 158,002 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/cnn.tflite     # 902,258 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/rnn.tflite     # 2,414,578 bytes allocated
+    ~$ seq 637 | valgrind bin/guess models/dcnn.tflite    # 465,122 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/dcnn47.tflite  # 981,583 bytes allocated
+    ~$ seq 13  | valgrind bin/guess models/dcnn13.tflite  # 689,566 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/edcnn47.tflite # 1,670,261 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/ecnn47.tflite  # 8,637,011 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/2ecnn47.tflite # 22,956,483 bytes allocated
+    ~$ seq 13  | valgrind bin/guess models/2ecnn13.tflite # 7,264,955 bytes allocated
 
 ### Play
 Let's consider voice control for led bulb.

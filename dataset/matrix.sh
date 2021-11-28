@@ -11,7 +11,6 @@ readonly DATASET_FILE_NAME=$1
 readonly DATASET_NUM_OUTPUT=`awk '{if(x<$1)x=$1}END{print ++x/3}' "${DATASET_FILE_NAME}"`
 
 bash ./../src/brain/build.sh
-bash ./../dataset/dataset/google_speech_commands/src/features/build.sh
 
 do_confusion_matrix() {
   local model=$1
