@@ -39,7 +39,7 @@ network. Model receives portion of the input sequence and classifies it incremen
 ### Training
 [MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb)\
 [DCNN47](jupyter/dcnn47.ipynb) | [EDCNN47](jupyter/edcnn47.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb)\
-[DCNN13](jupyter/dcnn13.ipynb) | [2ECNN13](jupyter/2ecnn13.ipynb)
+[DCNN13](jupyter/dcnn13.ipynb) | [2ECNN13](jupyter/2ecnn13.ipynb) | [3ECNN13](jupyter/3ecnn13_tpu.ipynb)
 
 Each notebook generates model file. To evaluate model accuracy:
 
@@ -199,6 +199,21 @@ Confusion matrix for pre-trained modeles:
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     2ECNN13 guessed wrong 92...
 
+    3ECNN13 confusion matrix...
+    zero   1.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
+    one    0.00 0.97 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.02 0.00 | 575
+    two    0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 564
+    three  0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 548
+    four   0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 605
+    five   0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.01 0.00 | 607
+    six    0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 0.00 | 462
+    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 | 574
+    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.01 0.00 | 547
+    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.01 0.00 | 596
+    #unk#  0.00 0.01 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.00 | 730
+    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
+    3ECNN13 guessed wrong 88...
+
 Evaluate false positives:
 
     ~$ wget https://data.deepai.org/timit.zip -O /tmp/timit.zip
@@ -207,6 +222,7 @@ Evaluate false positives:
 
 A false positive error, or false positive, is a result that indicates a given condition exists when it does not.
 
+    3ECNN13   10 | 11191
     2ECNN13   83 | 11191
     2ECNN47   48 | 11191
     EDCNN47 2042 | 11191
@@ -231,6 +247,7 @@ Some magic numbers to know before stepping into embedded world.
     ~$ seq 611 | valgrind bin/guess models/ecnn47.tflite  # 8,637,011 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/2ecnn47.tflite # 22,956,483 bytes allocated
     ~$ seq 13  | valgrind bin/guess models/2ecnn13.tflite # 7,264,955 bytes allocated
+    ~$ seq 13  | valgrind bin/guess models/3ecnn13.tflite # 10,733,331 bytes allocated
 
 ### Play
 Let's consider voice control for led bulb.
@@ -245,4 +262,4 @@ Let's consider voice control for led bulb.
 
 There are 4 commands here - turn on, off, change color. When we speak words `zero six`, script `./on.sh` will be executed e.t.c.
 
-    ~$ ./mic.sh models/2ecnn13.tflite | bigram | intent
+    ~$ ./mic.sh models/3ecnn13.tflite | bigram | intent
