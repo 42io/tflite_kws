@@ -1,12 +1,12 @@
 #include <cstdio>
 #include <list>
-#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/core/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
+#include "tensorflow/lite/optional_debug_tools.h"
+#include <tensorflow/lite/logger.h>
 
 static_assert(sizeof(float) == 4, "WTF");
-
-using namespace tflite;
 
 #define TFLITE_MINIMAL_CHECK(x)                              \
   if (!(x)) {                                                \
@@ -77,38 +77,39 @@ void guess(char* filename)
 {
   // Load model
   std::unique_ptr<tflite::FlatBufferModel> model =
-      FlatBufferModel::BuildFromFile(filename);
+      tflite::FlatBufferModel::BuildFromFile(filename);
   TFLITE_MINIMAL_CHECK(model != nullptr);
 
   // Build the interpreter
   tflite::ops::builtin::BuiltinOpResolver resolver;
-  InterpreterBuilder builder(*model, resolver);
-  std::unique_ptr<Interpreter> interpreter;
+  tflite::InterpreterBuilder builder(*model, resolver);
+  std::unique_ptr<tflite::Interpreter> interpreter;
   builder(&interpreter);
   TFLITE_MINIMAL_CHECK(interpreter != nullptr);
 
-  TFLITE_MINIMAL_CHECK(interpreter->inputs().size());
-
-  auto input = interpreter->tensor(interpreter->inputs()[0]);
-  TFLITE_MINIMAL_CHECK(input->type == kTfLiteFloat32);
-  TFLITE_MINIMAL_CHECK(input->bytes % (sizeof(float) * 13) == 0);
-
-  auto output = interpreter->tensor(interpreter->outputs()[0]);
-  TFLITE_MINIMAL_CHECK(output->type == kTfLiteFloat32);
-  TFLITE_MINIMAL_CHECK(output->bytes == 12 * sizeof(float));
-
   // Allocate tensor buffers.
   TFLITE_MINIMAL_CHECK(interpreter->AllocateTensors() == kTfLiteOk);
+
+  TFLITE_MINIMAL_CHECK(interpreter->inputs().size());
+
+  auto input = interpreter->input_tensor(0);
+  TFLITE_MINIMAL_CHECK(input->type == kTfLiteFloat32);
+  TFLITE_MINIMAL_CHECK(input->dims->size == 3);
+  TFLITE_MINIMAL_CHECK(input->dims->data[2] == 13);
+  TFLITE_MINIMAL_CHECK(input->bytes == input->dims->data[1] * input->dims->data[2] * sizeof(float));
+
+  auto output = interpreter->output_tensor(0);
+  TFLITE_MINIMAL_CHECK(output->type == kTfLiteFloat32);
+  TFLITE_MINIMAL_CHECK(output->bytes == 12 * sizeof(float));
+  TFLITE_MINIMAL_CHECK(output->dims->size == 2);
+  TFLITE_MINIMAL_CHECK(output->dims->data[0] == 1 && output->dims->data[1] == 12);
 
   // Streaming models have > 1 inputs outputs
   TFLITE_MINIMAL_CHECK(interpreter->inputs().size() == interpreter->outputs().size());
   std::list<StreamingStateItem> streaming_state;
   for(size_t i = 1; i < interpreter->inputs().size(); i++)
   {
-    streaming_state.emplace_back(
-      interpreter->tensor(interpreter->inputs()[i]),
-      interpreter->tensor(interpreter->outputs()[i])
-    );
+    streaming_state.emplace_back(interpreter->input_tensor(i), interpreter->output_tensor(i));
   }
 
   int start = 0;
@@ -118,7 +119,7 @@ loop:
   // Fill input
   for(size_t i = start; i < input->bytes / sizeof(float); i++)
   {
-    TFLITE_MINIMAL_CHECK(scanf("%f", &input->data.f[i]) == 1);
+    TFLITE_MINIMAL_CHECK(scanf("%f", &reinterpret_cast<float*>(input->data.raw)[i]) == 1);
   }
   TFLITE_MINIMAL_CHECK(getchar() == '\n');
 
@@ -126,14 +127,14 @@ loop:
   TFLITE_MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
 
   // Result
-  print_output(output->data.f, output->bytes);
+  print_output(reinterpret_cast<float*>(output->data.raw), output->bytes);
 
   // Does nothing for non-streaming model
   for(auto& item : streaming_state)
     item.stream();
 
   // Exit or continue
-  start = scanf("%f", &input->data.f[0]);
+  start = scanf("%f", &reinterpret_cast<float*>(input->data.raw)[0]);
   if(start == 1)
     goto loop;
 
@@ -147,6 +148,8 @@ int main(int argc, char* argv[]) {
     fprintf(stderr, "guess <tflite model>\n");
     return 1;
   }
+
+  tflite::LoggerOptions::SetMinimumLogSeverity(tflite::TFLITE_LOG_WARNING);
 
   guess(argv[1]);
 

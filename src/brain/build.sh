@@ -17,7 +17,7 @@ test -d "${BIN_PATH}" || mkdir "${BIN_PATH}"
 if [ ! -f "${BIN_PATH}/${GUESS}" ]; then
   mkdir "${BUILD}"
   cd "${BUILD}"
-  cmake cmake ../ -DTFLITE_ENABLE_XNNPACK=OFF
+  cmake cmake ../
   cmake --build . -j `nproc`
   cd -
   mv "${BUILD}/${GUESS}" "${BIN_PATH}"
