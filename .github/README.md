@@ -12,7 +12,6 @@ Default models pre-trained on 0-9 words: zero one two three four five six seven 
     ~$ aplay test.wav
     ~$ src/features/build.sh
     ~$ src/brain/build.sh
-    ~$ bin/fe test.wav | bin/guess models/dcnn.tflite
     ~$ bin/fe test.wav | head -48 | tail -47 | bin/guess models/dcnn47.tflite
     ~$ cat <(bin/fe test.wav) <(seq 52) | bin/guess models/dcnn13.tflite | tail -1
 
@@ -37,9 +36,8 @@ network. Model receives portion of the input sequence and classifies it incremen
        bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10
 
 ### Training
-[MLP](jupyter/mlp.ipynb) | [CNN](jupyter/cnn.ipynb) | [RNN](jupyter/rnn.ipynb) | [DCNN](jupyter/dcnn.ipynb)\
-[DCNN47](jupyter/dcnn47.ipynb) | [EDCNN47](jupyter/edcnn47.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb)\
-[DCNN13](jupyter/dcnn13.ipynb) | [2ECNN13](jupyter/2ecnn13.ipynb) | [3ECNN13](jupyter/3ecnn13_tpu.ipynb)
+[DCNN47](jupyter/dcnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb) | [ECNN47](jupyter/ecnn47.ipynb)\
+[DCNN13](jupyter/dcnn13.ipynb) | [2ECNN13](jupyter/2ecnn13.ipynb)
 
 Each notebook generates model file. To evaluate model accuracy:
 
@@ -48,66 +46,6 @@ Each notebook generates model file. To evaluate model accuracy:
     ~$ dataset/matrix.sh /tmp/0-9up.data
 
 Confusion matrix for pre-trained modeles:
-
-    MLP confusion matrix...
-    zero   0.93 0.00 0.03 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.03 0.00 | 603
-    one    0.00 0.85 0.00 0.00 0.01 0.01 0.00 0.00 0.00 0.05 0.06 0.01 | 575
-    two    0.03 0.00 0.86 0.02 0.02 0.00 0.00 0.01 0.01 0.00 0.04 0.01 | 564
-    three  0.00 0.00 0.01 0.90 0.00 0.01 0.01 0.01 0.04 0.01 0.01 0.01 | 548
-    four   0.00 0.01 0.01 0.00 0.90 0.01 0.00 0.00 0.00 0.00 0.05 0.01 | 605
-    five   0.00 0.01 0.00 0.01 0.01 0.80 0.01 0.03 0.01 0.03 0.09 0.01 | 607
-    six    0.00 0.00 0.00 0.00 0.00 0.00 0.96 0.00 0.00 0.00 0.02 0.01 | 462
-    seven  0.01 0.00 0.03 0.01 0.00 0.00 0.01 0.90 0.00 0.00 0.03 0.01 | 574
-    eight  0.00 0.00 0.01 0.07 0.00 0.00 0.03 0.00 0.84 0.01 0.03 0.01 | 547
-    nine   0.00 0.04 0.00 0.01 0.00 0.01 0.00 0.01 0.00 0.86 0.06 0.01 | 596
-    #unk#  0.02 0.03 0.03 0.05 0.06 0.07 0.02 0.03 0.02 0.07 0.58 0.02 | 730
-    #pub#  0.00 0.00 0.01 0.00 0.00 0.01 0.01 0.00 0.00 0.00 0.00 0.96 | 730
-    MLP guessed wrong 1029...
-
-    CNN confusion matrix...
-    zero   0.97 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.02 0.00 | 603
-    one    0.00 0.93 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.01 0.05 0.00 | 575
-    two    0.01 0.00 0.95 0.00 0.00 0.00 0.00 0.01 0.00 0.00 0.03 0.00 | 564
-    three  0.00 0.00 0.00 0.91 0.00 0.00 0.01 0.01 0.01 0.00 0.06 0.00 | 548
-    four   0.00 0.00 0.00 0.00 0.90 0.00 0.00 0.00 0.00 0.00 0.09 0.00 | 605
-    five   0.00 0.00 0.00 0.00 0.00 0.93 0.00 0.00 0.01 0.01 0.06 0.00 | 607
-    six    0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.01 0.00 | 462
-    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.97 0.00 0.00 0.02 0.00 | 574
-    eight  0.00 0.00 0.01 0.01 0.00 0.01 0.01 0.00 0.93 0.00 0.03 0.00 | 547
-    nine   0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.93 0.06 0.00 | 596
-    #unk#  0.01 0.01 0.00 0.02 0.02 0.00 0.00 0.00 0.00 0.01 0.92 0.01 | 730
-    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.98 | 730
-    CNN guessed wrong 427...
-
-    RNN confusion matrix...
-    zero   0.98 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
-    one    0.00 0.95 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.01 0.02 0.00 | 575
-    two    0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 564
-    three  0.00 0.00 0.00 0.97 0.00 0.00 0.01 0.00 0.01 0.00 0.01 0.00 | 548
-    four   0.00 0.00 0.00 0.00 0.97 0.00 0.00 0.00 0.00 0.00 0.02 0.00 | 605
-    five   0.00 0.00 0.00 0.00 0.01 0.98 0.00 0.00 0.00 0.00 0.01 0.00 | 607
-    six    0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 | 462
-    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.00 0.00 0.01 0.00 | 574
-    eight  0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.97 0.00 0.01 0.00 | 547
-    nine   0.00 0.01 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.97 0.02 0.00 | 596
-    #unk#  0.00 0.01 0.00 0.01 0.02 0.02 0.00 0.00 0.01 0.02 0.91 0.00 | 730
-    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 | 730
-    RNN guessed wrong 220...
-
-    DCNN confusion matrix...
-    zero   0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 0.00 0.00 0.00 | 603
-    one    0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.01 0.00 | 575
-    two    0.01 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 564
-    three  0.00 0.00 0.00 0.97 0.00 0.00 0.01 0.00 0.01 0.00 0.00 0.00 | 548
-    four   0.00 0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 605
-    five   0.00 0.00 0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.01 0.00 | 607
-    six    0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 | 462
-    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 | 574
-    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.01 0.00 | 547
-    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.01 0.00 | 596
-    #unk#  0.00 0.01 0.01 0.01 0.01 0.00 0.00 0.00 0.00 0.00 0.94 0.00 | 730
-    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
-    DCNN guessed wrong 143...
 
     DCNN47 confusion matrix...
     zero   0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
@@ -138,21 +76,6 @@ Confusion matrix for pre-trained modeles:
     #unk#  0.00 0.01 0.00 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.97 0.00 | 730
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     DCNN13 guessed wrong 82...
-
-    EDCNN47 confusion matrix...
-    zero   0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 603
-    one    0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.02 0.00 | 575
-    two    0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.02 0.00 | 564
-    three  0.00 0.00 0.00 0.97 0.00 0.00 0.01 0.00 0.00 0.00 0.03 0.00 | 548
-    four   0.00 0.00 0.00 0.00 0.97 0.00 0.00 0.00 0.00 0.00 0.03 0.00 | 605
-    five   0.00 0.00 0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.01 0.00 | 607
-    six    0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.01 0.00 | 462
-    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.01 0.00 | 574
-    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 | 547
-    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.01 0.00 | 596
-    #unk#  0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.00 | 730
-    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
-    EDCNN47 guessed wrong 116...
 
     ECNN47 confusion matrix...
     zero   1.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
@@ -199,21 +122,6 @@ Confusion matrix for pre-trained modeles:
     #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
     2ECNN13 guessed wrong 92...
 
-    3ECNN13 confusion matrix...
-    zero   1.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 | 603
-    one    0.00 0.97 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.02 0.00 | 575
-    two    0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 564
-    three  0.00 0.00 0.00 0.98 0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 548
-    four   0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.00 0.01 0.00 | 605
-    five   0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 0.01 0.00 | 607
-    six    0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.00 0.00 0.00 0.00 0.00 | 462
-    seven  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.00 0.00 0.00 | 574
-    eight  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.00 0.01 0.00 | 547
-    nine   0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.99 0.01 0.00 | 596
-    #unk#  0.00 0.01 0.00 0.01 0.00 0.00 0.00 0.00 0.00 0.00 0.98 0.00 | 730
-    #pub#  0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 1.00 | 730
-    3ECNN13 guessed wrong 88...
-
 Evaluate false positives:
 
     ~$ wget https://data.deepai.org/timit.zip -O /tmp/timit.zip
@@ -222,32 +130,21 @@ Evaluate false positives:
 
 A false positive error, or false positive, is a result that indicates a given condition exists when it does not.
 
-    3ECNN13   10 | 11191
     2ECNN13   83 | 11191
     2ECNN47   48 | 11191
-    EDCNN47 2042 | 11191
     ECNN47  4494 | 11191
     DCNN13  4787 | 11191
     DCNN47  4517 | 11191
-    MLP     5091 | 10991
-    CNN     4958 | 10991
-    RNN     4527 | 10991
 
 ### Heap Memory Usage
 Some magic numbers to know before stepping into embedded world.
 
     ~$ head /dev/zero -c32000 | valgrind bin/fe           # 1,136,764 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/mlp.tflite     # 158,002 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/cnn.tflite     # 902,258 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/rnn.tflite     # 2,414,578 bytes allocated
-    ~$ seq 637 | valgrind bin/guess models/dcnn.tflite    # 465,122 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/dcnn47.tflite  # 981,583 bytes allocated
     ~$ seq 13  | valgrind bin/guess models/dcnn13.tflite  # 689,566 bytes allocated
-    ~$ seq 611 | valgrind bin/guess models/edcnn47.tflite # 1,670,261 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/ecnn47.tflite  # 8,637,011 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/2ecnn47.tflite # 22,956,483 bytes allocated
     ~$ seq 13  | valgrind bin/guess models/2ecnn13.tflite # 7,264,955 bytes allocated
-    ~$ seq 13  | valgrind bin/guess models/3ecnn13.tflite # 10,733,331 bytes allocated
 
 ### Play
 Let's consider voice control for led bulb.
@@ -262,4 +159,4 @@ Let's consider voice control for led bulb.
 
 There are 4 commands here - turn on, off, change color. When we speak words `zero six`, script `./on.sh` will be executed e.t.c.
 
-    ~$ ./mic.sh models/3ecnn13.tflite | bigram | intent
+    ~$ ./mic.sh models/2ecnn13.tflite | bigram | intent
