@@ -13,6 +13,7 @@ readonly DATASET_NUM_OUTPUT=`awk '{if(x<$1)x=$1}END{print ++x/3}' "${DATASET_FIL
 bash ./../src/brain/build.sh
 
 do_confusion_matrix() {
+  local -r labels=("zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine" "#unk#" "#pub#")
   local model=$1
   local start=$2
   local count=$3
@@ -20,6 +21,7 @@ do_confusion_matrix() {
   local glean=$5
   local i
   for i in `seq ${DATASET_NUM_OUTPUT}` ; do
+    echo -ne "${labels[i-1]}\t"
     awk -v m="${DATASET_NUM_OUTPUT}" '$1 >= m' "${DATASET_FILE_NAME}" \
       | awk -v i="${i}" -v m="${DATASET_NUM_OUTPUT}" '$1 == i - 1 + m || $1 == i - 1 + 2*m' \
       | awk -v s="${start}" -v c="${count}" -v d="${delay}" '{for(i=0;i<c;i++)print $(i+s);for(i=0;i<d;i++)print 0}' \
@@ -55,7 +57,7 @@ do_all() {
   local delay=$5
   local glean=$6
   echo "${title} confusion matrix..."
-  do_confusion_matrix ${model} ${start} ${count} ${delay} ${glean}
+  do_confusion_matrix ${model} ${start} ${count} ${delay} ${glean} | sed 's!0.00 ! .   !g'
   echo "${title} guessed wrong `do_validation ${model} ${start} ${count} ${delay} ${glean} | wc -l`..."
 }
 
