@@ -36,7 +36,7 @@ network. Model receives portion of the input sequence and classifies it incremen
        bin/guess models/dcnn13.tflite | argmax | stable 10 | ignore 10
 
 ### Training
-[DCNN47](jupyter/dcnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [S2CNN47](jupyter/s2cnn47_tpu.ipynb) \
+[DCNN47](jupyter/dcnn47.ipynb) | [2ECNN47](jupyter/2ecnn47_tpu.ipynb) | [ECNN47](jupyter/ecnn47.ipynb) | [S2CNN47](jupyter/s2cnn47_tpu.ipynb) | [US3CNN47](jupyter/us3cnn47.ipynb) \
 [DCNN13](jupyter/dcnn13.ipynb) | [2ECNN13](jupyter/2ecnn13.ipynb) | [S2CNN13](jupyter/s2cnn13_tpu.ipynb)
 
 Each notebook generates model file. To evaluate model accuracy:
@@ -152,6 +152,21 @@ Confusion matrix for pre-trained modeles:
     #pub#    .    .    .    .    .    .    .    .    .    .    .   1.00 | 730
     S2CNN13 guessed wrong 45...
 
+    U3CNN47 confusion matrix...
+    zero    1.00  .    .    .    .    .    .    .    .    .    .    .   | 603
+    one      .   0.99  .    .    .    .    .    .    .    .   0.01  .   | 575
+    two      .    .   0.99  .    .    .    .    .    .    .   0.01  .   | 564
+    three    .    .    .   0.99  .    .    .    .    .    .   0.01  .   | 548
+    four     .    .    .    .   0.99  .    .    .    .    .   0.01  .   | 605
+    five     .    .    .    .    .   1.00  .    .    .    .    .    .   | 607
+    six      .    .    .    .    .    .   1.00  .    .    .    .    .   | 462
+    seven    .    .    .    .    .    .    .   1.00  .    .    .    .   | 574
+    eight    .    .    .    .    .    .    .    .   1.00  .    .    .   | 547
+    nine     .    .    .    .    .    .    .    .    .   0.99  .    .   | 596
+    #unk#    .    .    .   0.01  .    .    .    .    .    .   0.98  .   | 730
+    #pub#    .    .    .    .    .    .    .    .    .    .    .   1.00 | 730
+    U3CNN47 guessed wrong 48...
+
 Evaluate false positives:
 
     ~$ wget https://data.deepai.org/timit.zip -O /tmp/timit.zip
@@ -160,6 +175,7 @@ Evaluate false positives:
 
 A false positive error, or false positive, is a result that indicates a given condition exists when it does not.
 
+    U3CNN47    6 | 11191
     S2CNN47   12 | 11191
     S2CNN13   22 | 11191
     2ECNN13   83 | 11191
@@ -179,6 +195,7 @@ Some magic numbers to know before stepping into embedded world.
     ~$ seq 13  | valgrind bin/guess models/2ecnn13.tflite # 7,264,955 bytes allocated
     ~$ seq 611 | valgrind bin/guess models/s2cnn47.tflite # 28,190,401 bytes allocated
     ~$ seq 13  | valgrind bin/guess models/s2cnn13.tflite # 17,881,002 bytes allocated
+    ~$ seq 611 | valgrind bin/guess models/u3cnn47.tflite # 17,988,367 bytes allocated
 
 ### Play
 Let's consider voice control for led bulb.
@@ -193,4 +210,4 @@ Let's consider voice control for led bulb.
 
 There are 4 commands here - turn on, off, change color. When we speak words `zero six`, script `./on.sh` will be executed e.t.c.
 
-    ~$ ./mic.sh models/s2cnn13.tflite | bigram | intent
+    ~$ ./mic.sh models/u3cnn47.tflite | bigram | intent

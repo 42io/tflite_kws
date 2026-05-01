@@ -68,6 +68,7 @@ do_all '2ECNN47' '2ecnn47.tflite' 15 611 0  1
 do_all '2ECNN13' '2ecnn13.tflite' 15 611 65 52
 do_all 'S2CNN47' 's2cnn47.tflite' 15 611 0  1
 do_all 'S2CNN13' 's2cnn13.tflite' 15 611 65 52
+do_all 'U3CNN47' 'u3cnn47.tflite' 15 611 0  1
 
 # test
 # do_all '_2ECNN47' '_2ecnn47.tflite' 15 611 0  1
